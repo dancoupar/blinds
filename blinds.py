@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import argparse
+import logging
 import time
 import sys
 import RPi.GPIO as GPIO
@@ -30,6 +31,8 @@ def parse_args():
     group.add_argument('-r', '--right', help='send the command to the right blind', action='store_true')
     return parser.parse_args()
  
+logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S', format='%(asctime)-15s - [%(levelname)s] %(module)s: %(message)s', filename='blinds.log')
+
 def transmit_sequence(sequence):
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(TRANSMIT_PIN, GPIO.OUT)
@@ -65,5 +68,5 @@ if __name__ == '__main__':
         sequence += '_MIDDLE'
     elif args.right:
         sequence += '_RIGHT'
+    logging.info('transmitting sequence for ' + sequence)
     exec('transmit_sequence(' + sequence + ')')
-
