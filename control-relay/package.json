@@ -1,0 +1,13 @@
+{
+    "name": "blind_control_relay",
+    "version": "1.0.0",
+    "description": "A relay program for an RF-433MHz electronic blind system, allowing the blinds to be controlled via webhooks.",
+    "author": "Dan Coupar <dan.coupar@gmail.com>",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "express": "^4.18.1"
+    }
+}
