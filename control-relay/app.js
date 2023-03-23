@@ -5,20 +5,21 @@ let fs = require('fs');
 let subscribers = Object.create(null);
 
 const allowedCommands = [
-  'up',
-  'down',
-  'stop'
+  'UP',
+  'DOWN',
+  'STOP'
 ];
 
 function onSubscribe(req, res) {
-  let id = Math.random();
+  let id = Math.floor(Math.random() * 1000000);
 
   res.setHeader('Content-Type', 'text/plain;charset=utf-8');
   res.setHeader("Cache-Control", "no-cache, must-revalidate");
 
   subscribers[id] = res;
 
-  console.log('registered new subscriber ' + id);
+  console.log('received new request ' + id);
+  console.log('awaiting command');
 
   req.on('close', function() {
     delete subscribers[id];
@@ -28,7 +29,7 @@ function onSubscribe(req, res) {
 function publish(command) {
   for (let id in subscribers) {
     let res = subscribers[id];
-    console.log('publishing command ' + command + ' to ' + id);
+    console.log('responding to request ' + id + ' with command ' + command);
     res.end(command);
   }
 

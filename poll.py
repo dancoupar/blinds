@@ -18,11 +18,11 @@ def poll():
     global err_count
     global bad_response_count
     while (bad_response_count < 10):
-        logging.info('waiting for command')
+        logging.info('polling for command')
         response = requests.get(url = url)
         if (response.status_code == 200):
-            if (response.text == 'up' or response.text == 'down' or response.text == 'stop'):
-                logging.info('received command: ' + response.text)
+            if (response.text == 'UP' or response.text == 'DOWN' or response.text == 'STOP'):
+                logging.info('received command ' + response.text)
                 os.system('python /usr/src/blinds/blinds.py ' + response.text)
                 bad_response_count = 0
         else:
