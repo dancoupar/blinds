@@ -5,9 +5,9 @@ let fs = require('fs');
 let subscribers = Object.create(null);
 
 const allowedCommands = [
-  'UP',
-  'DOWN',
-  'STOP'
+  'up',
+  'down',
+  'stop'
 ];
 
 function onSubscribe(req, res) {
@@ -29,7 +29,7 @@ function onSubscribe(req, res) {
 function publish(command) {
   for (let id in subscribers) {
     let res = subscribers[id];
-    console.log('responding to request ' + id + ' with command ' + command);
+    console.log('responding to request ' + id + ' with command ' + command.toUpperCase());
     res.end(command);
   }
 
@@ -49,7 +49,7 @@ function accept(req, res) {
   if (urlParsed.pathname === '/ctrl' && req.method === 'GET') {
     let command = urlParsed.query.cmd;
     if (commandAllowed(command)) {
-      console.log('received command ' + command);
+      console.log('received command ' + command.toUpperCase());
       publish(command);
     }
     else {
