@@ -22,7 +22,7 @@ def poll():
         response = requests.get(url = url)
         if (response.status_code == 200):
             if (response.text == 'up' or response.text == 'down' or response.text == 'stop'):
-                logging.info('received command ' + response.text)
+                logging.info('received command ' + response.text.upper())
                 os.system('python /usr/src/blinds/blinds.py ' + response.text)
                 bad_response_count = 0
         else:
