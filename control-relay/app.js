@@ -18,18 +18,17 @@ function onSubscribe(req, res) {
 
   subscribers[id] = res;
 
-  console.log('Registered new subscriber ' + id);
+  console.log('registered new subscriber ' + id);
 
   req.on('close', function() {
     delete subscribers[id];
   });
-
 }
 
 function publish(command) {
-
   for (let id in subscribers) {
     let res = subscribers[id];
+    console.log('publishing command ' + command + ' to ' + id);
     res.end(command);
   }
 
@@ -39,42 +38,26 @@ function publish(command) {
 function accept(req, res) {
   let urlParsed = url.parse(req.url, true);
 
-  // new client wants messages
+  // Listen for subscribers
   if (urlParsed.pathname === '/subscribe' && req.method === 'GET') {
     onSubscribe(req, res);
     return;
   }
-
-  // sending a message
+  
+  // Listen for commands
   if (urlParsed.pathname === '/ctrl' && req.method === 'GET') {
-    // accept POST
     let command = urlParsed.query.cmd;
     if (commandAllowed(command)) {
-      publish(command); // publish it to everyone
+      console.log('received command ' + command);
+      publish(command);
     }
     else {
+      console.log('received bad command');
       res.writeHead(400);
     }
     res.end();
     return;
   }
-
-  /*
-  let filename = 'index.html';
-  if (urlParsed.pathname == '/client.js') {
-    filename = 'client.js';
-  }
-  
-  fs.readFile(__dirname + '/' + filename, function (err, data) {
-    if (err) {
-      res.writeHead(404);
-      res.end(JSON.stringify(err));
-      return;
-    }
-    res.writeHead(200);
-    res.end(data);
-  });
-  */
 
   res.writeHead(404);
   res.end();
@@ -101,4 +84,4 @@ function close() {
 
 const port = parseInt(process.env.PORT) || 8080;
 http.createServer(accept).listen(port);
-console.log('Server running on port ' + port);
+console.log('server running on port ' + port);
