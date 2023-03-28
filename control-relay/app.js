@@ -48,7 +48,7 @@ function accept(req, res) {
   res.on('error', function(err) {
     console.log('response error: ' + err);
   });
-  res.on('end', function()) {
+  res.on('end', function() {
     console.log('response ended');
   });
   let urlParsed = url.parse(req.url, true);
