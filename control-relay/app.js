@@ -50,7 +50,7 @@ function accept(req, res) {
   });
   res.on('end', function()) {
     console.log('response ended');
-  }
+  });
   let urlParsed = url.parse(req.url, true);
 
   // Listen for subscribers
