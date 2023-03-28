@@ -85,6 +85,6 @@ function close() {
 
 const port = parseInt(process.env.PORT) || 8080;
 const server = http.createServer(accept);
-server.timeout = 1000; // 86400000 
+server.timeout = 86400000; 
 server.listen(port);
 console.log('server running on port ' + port);
