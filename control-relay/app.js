@@ -37,7 +37,7 @@ function publish(command) {
 }
 
 function accept(req, res) {
-  req.on('error', function(err) {
+  req.on('error', function(err)) {
     console.log('error: ' + err);
   }
   let urlParsed = url.parse(req.url, true);
