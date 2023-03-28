@@ -22,6 +22,7 @@ function onSubscribe(req, res) {
   console.log('awaiting command');
 
   req.on('close', function() {
+    console.log('request ' + id + ' closed');
     delete subscribers[id];
   });
 
@@ -47,6 +48,9 @@ function accept(req, res) {
   res.on('error', function(err) {
     console.log('response error: ' + err);
   });
+  res.on('end', function()) {
+    console.log('response ended');
+  }
   let urlParsed = url.parse(req.url, true);
 
   // Listen for subscribers
