@@ -24,6 +24,10 @@ function onSubscribe(req, res) {
   req.on('close', function() {
     delete subscribers[id];
   });
+
+  res.on('end', function() {
+    console.log('response ended for request ' + id);
+  });
 }
 
 function publish(command) {
@@ -38,7 +42,10 @@ function publish(command) {
 
 function accept(req, res) {
   req.on('error', function(err) {
-    console.log('error: ' + err);
+    console.log('request error: ' + err);
+  });
+  res.on('error', function(err) {
+    console.log('response error: ' + err);
   });
   let urlParsed = url.parse(req.url, true);
 
@@ -88,6 +95,6 @@ function close() {
 
 const port = parseInt(process.env.PORT) || 8080;
 const server = http.createServer(accept);
-server.timeout = 86400000; 
+server.requestTimeout = 86400000; 
 server.listen(port);
 console.log('server running on port ' + port);
