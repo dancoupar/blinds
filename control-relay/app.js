@@ -25,10 +25,6 @@ function onSubscribe(req, res) {
     console.log('request ' + id + ' closed');
     delete subscribers[id];
   });
-
-  res.on('end', function() {
-    console.log('response ended for request ' + id);
-  });
 }
 
 function publish(command) {
@@ -47,9 +43,6 @@ function accept(req, res) {
   });
   res.on('error', function(err) {
     console.log('response error: ' + err);
-  });
-  res.on('end', function() {
-    console.log('response ended');
   });
   let urlParsed = url.parse(req.url, true);
 

@@ -9,8 +9,8 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S',
     format='%(asctime)-15s - [%(levelname)s] %(module)s: %(message)s',
     handlers=[logging.FileHandler("blinds.log"), logging.StreamHandler()])
-  
-url = "https://blind-control-relay-xxxxxxxxxxxx.onrender.com/subscribe"
+
+url = os.environ.get('CONTROL_RELAY_URI') + '/subscribe'
 err_count = 0
 bad_response_count = 0
 
