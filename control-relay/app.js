@@ -95,7 +95,7 @@ function authorise(request) {
       return false;
     }
     // No username, but trim off leading :
-    if (atob(splitHeader[1]).substring(1) !== process.env.CLIENT_KEY) {
+    if (Buffer.from(splitHeader[1], 'base64').toString().substring(1) !== process.env.CLIENT_KEY) {
       return false;
     }
   }
