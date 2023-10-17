@@ -78,12 +78,12 @@ function processControlCommand(request, response) {
     return;
   }
   if (!commandAllowed(command)) {
-    console.error('received bad command: ' + command.toUpperCase());
+    console.error('received bad command ' + command.toUpperCase());
     response.writeHead(400);
     response.end();
     return;
   }
-  console.log('received command: ' + command.toUpperCase());
+  console.log('received command ' + command.toUpperCase());
   publish(command);
   response.end();
 }
