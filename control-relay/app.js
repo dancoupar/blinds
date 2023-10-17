@@ -1,6 +1,5 @@
 let http = require('http');
 let url = require('url');
-let fs = require('fs');
 
 let subscribers = Object.create(null);
 
@@ -10,18 +9,13 @@ const allowedCommands = [
   'stop'
 ];
 
-function onSubscribe(req, res) {
+function onSubscribe(request, response) {
   let id = Math.floor(Math.random() * 1000000);
-
-  res.setHeader('Content-Type', 'text/plain;charset=utf-8');
-  res.setHeader("Cache-Control", "no-cache, must-revalidate");
-
-  subscribers[id] = res;
-
+  response.setHeader("Cache-Control", "no-cache, must-revalidate");
+  subscribers[id] = response;
   console.log('received new request ' + id);
   console.log('awaiting command');
-
-  req.on('close', function() {
+  request.on('close', function() {
     console.log('request ' + id + ' closed');
     delete subscribers[id];
   });
@@ -29,47 +23,85 @@ function onSubscribe(req, res) {
 
 function publish(command) {
   for (let id in subscribers) {
-    let res = subscribers[id];
+    let response = subscribers[id];
     console.log('responding to request ' + id + ' with command ' + command.toUpperCase());
-    res.end(command);
+    response.end(command);
   }
-
   subscribers = Object.create(null);
 }
 
-function accept(req, res) {
-  req.on('error', function(err) {
-    console.log('request error: ' + err);
-  });
-  res.on('error', function(err) {
-    console.log('response error: ' + err);
-  });
-  let urlParsed = url.parse(req.url, true);
-
-  // Listen for subscribers
-  if (urlParsed.pathname === '/subscribe' && req.method === 'GET') {
-    onSubscribe(req, res);
+function accept(request, response) {
+  response.setHeader('Content-Type', 'text/plain;charset=utf-8');
+  if (!authorise(request)) {
+    response.writeHead(401, { 'WWW-Authenticate': 'Basic' });
+    response.end();
     return;
   }
-  
-  // Listen for commands
-  if (urlParsed.pathname === '/ctrl' && req.method === 'GET') {
-    let command = urlParsed.query.cmd;
-    if (commandAllowed(command)) {
-      console.log('received command ' + command.toUpperCase());
-      publish(command);
-    }
-    else {
-      console.log('received bad command');
-      res.writeHead(400);
-    }
-    res.end();
+  request.on('error', function(err) {
+    console.error('request error: ' + err);
+  });
+  response.on('error', function(err) {
+    console.error('response error: ' + err);
+  });
+  let urlParsed = url.parse(request.url, false);
+  if (urlParsed.pathname === '/subscribe') {
+    processSubscribe(request, response);
+    return;
+  }  
+  if (urlParsed.pathname === '/ctrl') {
+    processControlCommand(request, response);
     return;
   }
+  response.writeHead(404);
+  response.end();
+}
 
-  res.writeHead(404);
-  res.end();
-  return;
+function processSubscribe(request, response) {
+  if (request.method !== 'GET') {
+    response.writeHead(405);
+    response.end();
+    return;
+  }
+  onSubscribe(request, response);
+}
+
+function processControlCommand(request, response) {
+  if (request.method !== 'POST') {
+    response.writeHead(405);
+    response.end();
+    return;
+  }  
+  let command = url.parse(request.url, true).query.cmd;
+  if (command === undefined) {
+    response.writeHead(400);
+    response.end();
+    return;
+  }
+  if (!commandAllowed(command)) {
+    console.error('received bad command: ' + command.toUpperCase());
+    response.writeHead(400);
+    response.end();
+    return;
+  }
+  console.log('received command: ' + command.toUpperCase());
+  publish(command);   
+  response.end();
+}
+
+function authorise(request) {
+  try {
+    let splitHeader = request.headers['authorization'].split(' ');
+    if (splitHeader.length < 2 || splitHeader[0].toLowerCase() !== 'basic') {
+      return false;
+    }
+    if (atob(splitHeader[1]) !== process.env.CLIENT_KEY) {
+      return false;
+    }
+  }
+  catch {
+    return false;
+  }
+  return true;
 }
 
 function commandAllowed(command) {
@@ -79,13 +111,6 @@ function commandAllowed(command) {
     }
   }
   return false;
-}
-
-function close() {
-  for (let id in subscribers) {
-    let res = subscribers[id];
-    res.end();
-  }
 }
 
 // -----------------------------------
