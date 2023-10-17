@@ -84,17 +84,18 @@ function processControlCommand(request, response) {
     return;
   }
   console.log('received command: ' + command.toUpperCase());
-  publish(command);   
+  publish(command);
   response.end();
 }
 
 function authorise(request) {
   try {
     let splitHeader = request.headers['authorization'].split(' ');
-    if (splitHeader.length < 2 || splitHeader[0].toLowerCase() !== 'basic') {
+    if (splitHeader.length !== 2 || splitHeader[0].toLowerCase() !== 'basic') {
       return false;
     }
-    if (atob(splitHeader[1]) !== process.env.CLIENT_KEY) {
+    // No username, but trim off leading :
+    if (atob(splitHeader[1]).substring(1) !== process.env.CLIENT_KEY) {
       return false;
     }
   }
