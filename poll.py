@@ -21,7 +21,6 @@ err_count = 0
 bad_response_count = 0
 
 def poll():
-    global err_count
     global bad_response_count
     while (True):
         try:
@@ -33,19 +32,20 @@ def poll():
                     os.system('python /usr/src/blinds/blinds.py ' + response.text)
                     bad_response_count = 0
             else:
-                logging.error('received bad response: ' + str(response.status_code))
-                bad_response_count += 1
-                if (bad_response_count > 9):
-                    logging.critical('aborted after ' + str(bad_response_count) + ' bad responses')
-                    sys.exit(1)
-                time.sleep(1)
-            err_count = 0
+                request_time = response.elapsed.total_seconds()
+                logging.error('received ' + str(response.status_code) + ' after ' + str(request_time) + ' seconds')
+                # Occasionally the hosting infrastructure will timeout the request
+                # Anything less than 10 minutes is considered a bad response
+                if (request_time < 600):
+                    bad_response_count += 1
+                else:
+                    bad_response_count = 0
+                if (bad_response_count > 0):
+                    backoff_seconds = 10 * bad_response_count
+                    logging.info('backing off for ' + str(backoff_seconds) + ' seconds')
+                    time.sleep(backoff_seconds)
         except Exception as err:
             logging.error(str(err))
-            err_count += 1
-            if (err_count > 9):
-                logging.critical('aborted after ' + str(err_count) + ' errors')
-                sys.exit(1)
-            time.sleep(1)
+            sys.exit(1)
 
 poll()
