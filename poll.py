@@ -17,6 +17,12 @@ except:
     logging.critical('unable to read environmental variable CONTROL_RELAY_URI')
     sys.exit(1)
 
+try:
+    client_key = os.environ['CLIENT_KEY']
+except:
+    logging.critical('unable to read environmental variable CLIENT_KEY')
+    sys.exit(1)
+
 err_count = 0
 bad_response_count = 0
 
@@ -25,7 +31,7 @@ def poll():
     while (True):
         try:
             logging.info('polling for command')
-            response = requests.get(url = url)
+            response = requests.get(url = url, auth=('', client_key))
             if (response.status_code == 200):
                 if (response.text == 'up' or response.text == 'down' or response.text == 'stop'):
                     logging.info('received command ' + response.text.upper())
