@@ -10,7 +10,7 @@ const allowedCommands = [
 ];
 
 function onSubscribe(request, response) {
-  let id = Math.floor(Math.random() * 1000000);
+  let id = generateRequestId();
   response.setHeader("Cache-Control", "no-cache, must-revalidate");
   subscribers[id] = response;
   console.log('received new request ' + id);
@@ -107,6 +107,14 @@ function authorise(request) {
     return false;
   }
   return true;
+}
+
+function generateRequestId() { 
+  let id = '';
+  for (let i = 0; i < 8; i++) {
+    id += (Math.floor(Math.random() * 16)).toString(16);
+  }
+  return id;
 }
 
 function commandAllowed(command) {
