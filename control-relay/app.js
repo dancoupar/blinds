@@ -32,6 +32,11 @@ function publish(command) {
 
 function accept(request, response) {
   response.setHeader('Content-Type', 'text/plain;charset=utf-8');
+  let urlParsed = url.parse(request.url, false);
+  if (urlParsed.pathname === '/health') {
+    response.end('Healthy');
+    return;
+  }
   if (!authorise(request)) {
     response.writeHead(401, { 'WWW-Authenticate': 'Basic' });
     response.end();
@@ -43,7 +48,6 @@ function accept(request, response) {
   response.on('error', function(err) {
     console.error('response error: ' + err);
   });
-  let urlParsed = url.parse(request.url, false);
   if (urlParsed.pathname === '/subscribe') {
     processSubscribe(request, response);
     return;
