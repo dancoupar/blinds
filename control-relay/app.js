@@ -33,7 +33,7 @@ function publish(command) {
 function accept(request, response) {
   response.setHeader('Content-Type', 'text/plain;charset=utf-8');
   let urlParsed = url.parse(request.url, false);
-  if (urlParsed.pathname === '/health') {
+  if (urlParsed.pathname === '/health' && request.method === 'GET') {
     response.end('Healthy');
     return;
   }
