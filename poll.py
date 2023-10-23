@@ -23,7 +23,6 @@ except:
     logging.critical('unable to read environmental variable CLIENT_KEY')
     sys.exit(1)
 
-err_count = 0
 bad_response_count = 0
 
 def poll():
