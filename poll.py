@@ -45,6 +45,9 @@ def poll():
                 request_time = response.elapsed.total_seconds()
                 logging.info('request timed out after ' + str(request_time) + ' seconds')
                 bad_response_count = 0
+            elif (response.status_code == 401):
+                logging.critical('received 401')
+                sys.exit(1)
             else:
                 request_time = response.elapsed.total_seconds()
                 logging.error('received ' + str(response.status_code) + ' after ' + str(request_time) + ' seconds')
