@@ -130,7 +130,7 @@ function commandAllowed(command) {
 
 const port = parseInt(process.env.PORT) || 8080;
 const server = http.createServer(accept);
-server.timeout = 86400000; // 1 day
-server.requestTimeout = 86400000; // 1 day
+let timeoutInSeconds = 3600;
+server.requestTimeout = 1000 * timeoutInSeconds;
 server.listen(port);
 console.log('server running on port ' + port);
