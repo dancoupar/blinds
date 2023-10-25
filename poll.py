@@ -30,7 +30,7 @@ def poll():
     while (True):
         try:
             logging.info('polling for command')
-            response = requests.get(url = url, auth=('', client_key), timeout=3610)
+            response = requests.get(url = url, auth=('', client_key), timeout=5400)
             if (response.status_code == 200):
                 if (response.text == 'up' or response.text == 'down' or response.text == 'stop'):
                     logging.info('received command ' + response.text.upper())
