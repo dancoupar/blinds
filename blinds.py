@@ -34,21 +34,24 @@ def parse_args():
 logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S', format='%(asctime)-15s - [%(levelname)s] %(module)s: %(message)s', filename='blinds.log')
 
 def transmit_sequence(sequence):
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(TRANSMIT_PIN, GPIO.OUT)
-    for t in range(NUM_ATTEMPTS):
-        transmit_start_sequence()
-        for i in sequence:
-            if i == '1':
-                transmit_bit(1, SHORT_DELAY)
-                transmit_bit(0, LONG_DELAY)
-            elif i == '0':
-                transmit_bit(1, LONG_DELAY)
-                transmit_bit(0, SHORT_DELAY)
-            else:
-                continue
-        GPIO.output(TRANSMIT_PIN, 0)
-    GPIO.cleanup()
+    try:
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(TRANSMIT_PIN, GPIO.OUT)
+        for t in range(NUM_ATTEMPTS):
+            transmit_start_sequence()
+            for i in sequence:
+                if i == '1':
+                    transmit_bit(1, SHORT_DELAY)
+                    transmit_bit(0, LONG_DELAY)
+                elif i == '0':
+                    transmit_bit(1, LONG_DELAY)
+                    transmit_bit(0, SHORT_DELAY)
+                else:
+                    continue
+            GPIO.output(TRANSMIT_PIN, 0)
+    finally:
+        # Reset pin. This mimics the GPIO.cleanup method, but leaves it pulled down rather than NONE, which causes the RF transmitter to jam the blinds!
+        GPIO.setup(TRANSMIT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def transmit_start_sequence():
     transmit_bit(1, 6 * LONG_DELAY)
