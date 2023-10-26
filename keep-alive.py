@@ -33,10 +33,9 @@ def keep_alive():
             else:
                 logging.error('received ' + str(response.status_code))
                 bad_response_count += 1
-                if (bad_response_count > 0):
-                    backoff_seconds = 10 * bad_response_count
-                    logging.info('backing off for ' + str(backoff_seconds) + ' seconds')
-                    time.sleep(backoff_seconds)
+                backoff_seconds = 10 * bad_response_count
+                logging.info('backing off for ' + str(backoff_seconds) + ' seconds')
+                time.sleep(backoff_seconds)
         except Exception as err:
             logging.error(str(err))
             sys.exit(1)

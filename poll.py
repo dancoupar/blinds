@@ -39,7 +39,7 @@ def poll():
                 else:
                     logging.critical('received unrecognised command ' + response.text.upper())
                     sys.exit(1)
-            elif (response.status_code == 407):
+            elif (response.status_code == 408):
                 # The control relay will time out the request after 1 hour
                 # This is normal and not considered an error, we just fire off a new request
                 request_time = response.elapsed.total_seconds()
