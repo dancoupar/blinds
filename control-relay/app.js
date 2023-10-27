@@ -1,5 +1,5 @@
-let http = require('http');
-let url = require('url');
+const http = require('http');
+const url = require('url');
 
 let subscribers = Object.create(null);
 
@@ -9,13 +9,49 @@ const allowedCommands = [
   'stop'
 ];
 
+const server = http.createServer((request, response) => {
+    response.setHeader('Content-Type', 'text/plain;charset=utf-8');
+    const urlParsed = url.parse(request.url, false);
+    if (urlParsed.pathname === '/health' && request.method === 'GET') {
+      response.end('Healthy');
+      return;
+    }
+    if (!authorise(request)) {
+      response.writeHead(401, { 'WWW-Authenticate': 'Basic' });
+      response.end();
+      return;
+    }
+    request.on('error', (err) => {
+      console.error('request error: ' + err);
+    });
+    response.on('error', (err) => {
+      console.error('response error: ' + err);
+    });
+    if (urlParsed.pathname === '/subscribe') {
+      processSubscribe(request, response);
+      return;
+    }  
+    if (urlParsed.pathname === '/ctrl') {
+      processControlCommand(request, response);
+      return;
+    }
+    response.writeHead(404);
+    response.end();  
+});
+
+const port = parseInt(process.env.PORT) || 8080;
+const timeoutInSeconds = 1200;
+server.requestTimeout = 1000 * timeoutInSeconds;
+server.listen(port);
+console.log('server running on port ' + port);
+
 function onSubscribe(request, response) {
-  let id = generateRequestId();
+  const id = generateRequestId();
   response.setHeader("Cache-Control", "no-cache, must-revalidate");
   subscribers[id] = response;
   console.log('received new request ' + id);
   console.log('awaiting command');
-  request.on('close', function() {
+  request.on('close', () => {
     console.log('request ' + id + ' closed');
     delete subscribers[id];
   });
@@ -23,41 +59,11 @@ function onSubscribe(request, response) {
 
 function publish(command) {
   for (let id in subscribers) {
-    let response = subscribers[id];
+    const response = subscribers[id];
     console.log('responding to request ' + id + ' with command ' + command.toUpperCase());
     response.end(command);
   }
   subscribers = Object.create(null);
-}
-
-function accept(request, response) {
-  response.setHeader('Content-Type', 'text/plain;charset=utf-8');
-  let urlParsed = url.parse(request.url, false);
-  if (urlParsed.pathname === '/health' && request.method === 'GET') {
-    response.end('Healthy');
-    return;
-  }
-  if (!authorise(request)) {
-    response.writeHead(401, { 'WWW-Authenticate': 'Basic' });
-    response.end();
-    return;
-  }
-  request.on('error', function(err) {
-    console.error('request error: ' + err);
-  });
-  response.on('error', function(err) {
-    console.error('response error: ' + err);
-  });
-  if (urlParsed.pathname === '/subscribe') {
-    processSubscribe(request, response);
-    return;
-  }  
-  if (urlParsed.pathname === '/ctrl') {
-    processControlCommand(request, response);
-    return;
-  }
-  response.writeHead(404);
-  response.end();
 }
 
 function processSubscribe(request, response) {
@@ -92,9 +98,9 @@ function processControlCommand(request, response) {
   response.end();
 }
 
-function authorise(request) {
+function authorise(request) {  
   try {
-    let splitHeader = request.headers['authorization'].split(' ');
+    const splitHeader = request.headers['authorization'].split(' ');
     if (splitHeader.length !== 2 || splitHeader[0].toLowerCase() !== 'basic') {
       return false;
     }
@@ -125,12 +131,3 @@ function commandAllowed(command) {
   }
   return false;
 }
-
-// -----------------------------------
-
-const port = parseInt(process.env.PORT) || 8080;
-const server = http.createServer(accept);
-let timeoutInSeconds = 900;
-server.requestTimeout = 1000 * timeoutInSeconds;
-server.listen(port);
-console.log('server running on port ' + port);
