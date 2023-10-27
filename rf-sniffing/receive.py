@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+#Credit: https://www.instructables.com/member/george7378/
+#https://www.instructables.com/Super-Simple-Raspberry-Pi-433MHz-Home-Automation/
+
 from datetime import datetime
 import matplotlib.pyplot as pyplot
 import RPi.GPIO as GPIO
