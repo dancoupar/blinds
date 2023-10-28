@@ -40,7 +40,7 @@ const server = http.createServer((request, response) => {
 });
 
 const port = parseInt(process.env.PORT) || 8080;
-const timeoutInSeconds = 1200;
+const timeoutInSeconds = 600;
 server.requestTimeout = 1000 * timeoutInSeconds;
 server.listen(port);
 console.log('server running on port ' + port);
