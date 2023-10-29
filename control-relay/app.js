@@ -42,14 +42,14 @@ const server = http.createServer((request, response) => {
 const port = parseInt(process.env.PORT) || 8080;
 server.listen(port);
 console.log('server running on port ' + port);
-
 function onSubscribe(request, response) {
   const id = generateRequestId();
+  const clientIp = request.headers['x-forwarded-for']?.split(',').shift() || request.socket?.remoteAddress;
   response.setHeader('Cache-Control', 'no-cache, must-revalidate');
   subscribers[id] = response;
-  console.log('received new request ' + id + ' (' + request.headers['x-forwarded-for'] + ')');
+  console.log('received new request ' + id + ' (' + clientIp + ')');
   console.log('awaiting command');
-  const timeoutInSeconds = 10;
+  const timeoutInSeconds = 3600;
   response.timeoutId = setTimeout(() => {
     console.log('request ' + id + ' timed out');
     response.writeHead(504);
