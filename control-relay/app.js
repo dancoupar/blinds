@@ -47,10 +47,11 @@ function onSubscribe(request, response) {
   const id = generateRequestId();
   response.setHeader('Cache-Control', 'no-cache, must-revalidate');
   subscribers[id] = response;
-  console.log('received new request ' + id + ' (' + request.connection.remoteAddress + ')');
+  console.log('received new request ' + id + ' (' + request.headers['x-forwarded-for'] + ')');
   console.log('awaiting command');
   const timeoutInSeconds = 10;
   response.timeoutId = setTimeout(() => {
+    console.log('request ' + id + ' timed out');
     response.writeHead(504);
     response.end();
   }, timeoutInSeconds * 1000);
@@ -103,8 +104,7 @@ function processControlCommand(request, response) {
   response.end();
 }
 
-function authorise(request) {  
-  return true;
+function authorise(request) {
   try {
     const splitHeader = request.headers['authorization'].split(' ');
     if (splitHeader.length !== 2 || splitHeader[0].toLowerCase() !== 'basic') {
