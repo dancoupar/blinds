@@ -40,19 +40,24 @@ const server = http.createServer((request, response) => {
 });
 
 const port = parseInt(process.env.PORT) || 8080;
-const timeoutInSeconds = 600;
-server.requestTimeout = 1000 * timeoutInSeconds;
 server.listen(port);
 console.log('server running on port ' + port);
-
 function onSubscribe(request, response) {
   const id = generateRequestId();
-  response.setHeader("Cache-Control", "no-cache, must-revalidate");
+  const clientIp = request.headers['x-forwarded-for']?.split(',').shift() || request.socket?.remoteAddress;
+  response.setHeader('Cache-Control', 'no-cache, must-revalidate');
   subscribers[id] = response;
-  console.log('received new request ' + id);
+  console.log('received new request ' + id + ' (' + clientIp + ')');
   console.log('awaiting command');
+  const timeoutInSeconds = 3600;
+  response.timeoutId = setTimeout(() => {
+    console.log('request ' + id + ' timed out');
+    response.writeHead(504);
+    response.end();
+  }, timeoutInSeconds * 1000);
   request.on('close', () => {
     console.log('request ' + id + ' closed');
+    clearTimeout(response.timeoutId);
     delete subscribers[id];
   });
 }
@@ -60,6 +65,7 @@ function onSubscribe(request, response) {
 function publish(command) {
   for (let id in subscribers) {
     const response = subscribers[id];
+    clearTimeout(response.timeoutId);
     console.log('responding to request ' + id + ' with command ' + command.toUpperCase());
     response.end(command);
   }
@@ -98,7 +104,7 @@ function processControlCommand(request, response) {
   response.end();
 }
 
-function authorise(request) {  
+function authorise(request) {
   try {
     const splitHeader = request.headers['authorization'].split(' ');
     if (splitHeader.length !== 2 || splitHeader[0].toLowerCase() !== 'basic') {
