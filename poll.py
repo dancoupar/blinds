@@ -30,7 +30,7 @@ def poll():
     while (True):
         try:
             logging.info('polling for command')
-            response = requests.get(url = url, auth=('', client_key), timeout=1800)
+            response = requests.get(url = url, auth=('', client_key))
             if (response.status_code == 200):
                 if (response.text == 'up' or response.text == 'down' or response.text == 'stop'):
                     logging.info('received command ' + response.text.upper())
@@ -39,8 +39,8 @@ def poll():
                 else:
                     logging.critical('received unrecognised command ' + response.text.upper())
                     sys.exit(1)
-            elif (response.status_code == 408):
-                # The control relay will time out the request after 20 minutes
+            elif (response.status_code == 504):
+                # The control relay will time out the request after 1 hour
                 # This is normal and not considered an error, we just fire off a new request
                 request_time = response.elapsed.total_seconds()
                 logging.info('request timed out after ' + str(request_time) + ' seconds')
