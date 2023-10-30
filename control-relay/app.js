@@ -30,13 +30,13 @@ const server = http.createServer((request, response) => {
     if (urlParsed.pathname === '/subscribe') {
       processSubscribe(request, response);
       return;
-    }  
+    }
     if (urlParsed.pathname === '/ctrl') {
       processControlCommand(request, response);
       return;
     }
     response.writeHead(404);
-    response.end();  
+    response.end();
 });
 
 const port = parseInt(process.env.PORT) || 8080;
@@ -49,7 +49,7 @@ function onSubscribe(request, response) {
   subscribers[id] = response;
   console.log('received new request ' + id + ' (' + clientIp + ')');
   console.log('awaiting command');
-  const timeoutInSeconds = 3600;
+  const timeoutInSeconds = 300;
   response.timeoutId = setTimeout(() => {
     console.log('request ' + id + ' timed out');
     response.writeHead(504);
