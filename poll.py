@@ -55,6 +55,8 @@ def poll():
                 backoff_seconds = 10 * bad_response_count
                 logging.info('backing off for ' + str(backoff_seconds) + ' seconds')
                 time.sleep(backoff_seconds)
+        except requests.Exceptions.Timeout:
+            logging.error(str(err))
         except Exception as err:
             logging.error(str(err))
             sys.exit(1)
