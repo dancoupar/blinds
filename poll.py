@@ -43,7 +43,7 @@ def poll():
                 # The control relay will time out the request after 5 minutes
                 # This is normal and not considered an error, we just fire off a new request
                 request_time = response.elapsed.total_seconds()
-                logging.info('request timed out after ' + str(request_time) + ' seconds')
+                logging.info('request timed out server side after ' + str(request_time) + ' seconds')
                 bad_response_count = 0
             elif (response.status_code == 401):
                 logging.critical('received 401')
@@ -56,7 +56,7 @@ def poll():
                 logging.info('backing off for ' + str(backoff_seconds) + ' seconds')
                 time.sleep(backoff_seconds)
         except requests.exceptions.Timeout:
-            logging.error(str(err))
+            logging.error('request timed out client side')
         except Exception as err:
             logging.error(str(err))
             sys.exit(1)
