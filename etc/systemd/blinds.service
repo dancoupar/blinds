@@ -1,0 +1,12 @@
+[Unit]
+Description=Blind Control
+After=multi-user.target
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+EnvironmentFile=/etc/environment
+ExecStart=/usr/bin/python /usr/src/blinds/poll.py
+
+[Install]
+WantedBy=multi-user.target
