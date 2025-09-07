@@ -24,6 +24,17 @@ except:
     sys.exit(1)
 
 bad_response_count = 0
+allowed_commands = [
+    'up',
+    'down',
+    'stop',
+    'up --left',
+    'up --middle',
+    'up --right',
+    'down --left',
+    'down --middle',
+    'down --right'
+]
 
 def poll():
     global bad_response_count
@@ -32,7 +43,7 @@ def poll():
             logging.info('polling for command')
             response = requests.get(url = url, auth=('', client_key), timeout=(2, 310))
             if (response.status_code == 200):
-                if (response.text == 'up' or response.text == 'down' or response.text == 'stop'):
+                if (is_command_allowed(response.text)):
                     logging.info('received command ' + response.text.upper())
                     os.system('python /usr/src/blinds/blinds.py ' + response.text)
                     bad_response_count = 0
@@ -60,5 +71,12 @@ def poll():
         except Exception as err:
             logging.error(str(err))
             sys.exit(1)
+
+def is_command_allowed(command):
+    global allowed_commands
+    for x in allowed_commands:
+        if (command == x):
+            return True
+    return False
 
 poll()

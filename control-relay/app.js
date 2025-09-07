@@ -7,12 +7,12 @@ const allowedCommands = [
   'up',
   'down',
   'stop',
-  'up--left',
-  'up--middle',
-  'up--right',
-  'down--left',
-  'down--middle',
-  'down--right'
+  'up --left',
+  'up --middle',
+  'up --right',
+  'down --left',
+  'down --middle',
+  'down --right'
 ];
 
 const server = http.createServer((request, response) => {
@@ -69,10 +69,6 @@ function onSubscribe(request, response) {
 }
 
 function publish(command) {
-  let argPosition = command.indexOf('--');
-  if (argPosition > -1) {
-    command = command.substring(0, argPosition) + ' ' + command.substring(argPosition, command.length);
-  }
   for (let id in subscribers) {
     const response = subscribers[id];
     clearTimeout(response.timeoutId);
@@ -103,6 +99,7 @@ function processControlCommand(request, response) {
     response.end();
     return;
   }
+  command = formatCommand(command);
   if (!commandAllowed(command)) {
     console.error('received bad command ' + command.toUpperCase());
     response.writeHead(400);
@@ -146,4 +143,12 @@ function commandAllowed(command) {
     }
   }
   return false;
+}
+
+function formatCommand(command) {
+  let argPosition = command.indexOf('--');
+  if (argPosition > -1) {
+    command = command.substring(0, argPosition) + ' ' + command.substring(argPosition, command.length);
+  }
+  return command;
 }
