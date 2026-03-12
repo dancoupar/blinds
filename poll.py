@@ -41,7 +41,7 @@ def poll():
     while (True):
         try:
             logging.info('polling for command')
-            response = requests.get(url = url, auth=('', client_key), timeout=(2, 310))
+            response = requests.get(url = url, auth=('', client_key), timeout=(2, 300))
             if (response.status_code == 200):
                 if (is_command_allowed(response.text)):
                     logging.info('received command ' + response.text.upper())
@@ -80,3 +80,4 @@ def is_command_allowed(command):
     return False
 
 poll()
+
