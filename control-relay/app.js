@@ -55,7 +55,7 @@ function onSubscribe(request, response) {
   subscribers[id] = response;
   console.log('received new request ' + id + ' (' + clientIp + ')');
   console.log('awaiting command');
-  const timeoutInSeconds = 300;
+  const timeoutInSeconds = 295;
   response.timeoutId = setTimeout(() => {
     console.log('request ' + id + ' timed out');
     response.writeHead(504);
