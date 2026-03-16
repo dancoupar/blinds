@@ -2,6 +2,7 @@ const http = require('http');
 const url = require('url');
 
 let subscribers = Object.create(null);
+let commandBuffer = undefined;
 
 const allowedCommands = [
   'up',
@@ -85,6 +86,10 @@ function processSubscribe(request, response) {
     return;
   }
   onSubscribe(request, response);
+  if (commandBuffer !== undefined) {
+    publish(commandBuffer.command);
+    clearCommandBuffer();
+  }
 }
 
 function processControlCommand(request, response) {
@@ -107,7 +112,12 @@ function processControlCommand(request, response) {
     return;
   }
   console.log('received command ' + command.toUpperCase());
-  publish(command);
+  if (subscribers.length > 0) {
+    publish(command);
+  }
+  else {
+    setCommandBuffer(command);
+  }
   response.end();
 }
 
@@ -151,4 +161,21 @@ function formatCommand(command) {
     command = command.substring(0, argPosition) + ' ' + command.substring(argPosition, command.length);
   }
   return command;
+}
+
+function setCommandBuffer(command) {
+  commandBuffer = {
+    command: command,
+    timeoutId = setTimeout(() => {
+      commandBuffer = undefined;
+    }, 2000)
+  };
+}
+
+function clearCommandBuffer() {
+  if (commandBuffer === undefined) {
+    return;
+  }
+  clearTimeout(commandBuffer.timeoutId);
+  commandBuffer = undefined;
 }
