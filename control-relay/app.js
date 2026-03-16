@@ -118,7 +118,7 @@ function processControlCommand(request, response) {
     return;
   }
   console.log('received command ' + command.toUpperCase());
-  if (subscribers.length > 0) {
+  if (Object.keys(subscribers).length > 0) {
     publish(command);
   }
   else {
