@@ -2,7 +2,13 @@ const http = require('http');
 const url = require('url');
 
 let subscribers = Object.create(null);
-let commandBuffer = undefined;
+let commandBuffer = {
+  command: undefined,
+  timeoutId: 0
+  hasValue: function() {
+    return command !== undefined;
+  }
+};
 
 const allowedCommands = [
   'up',
@@ -86,7 +92,7 @@ function processSubscribe(request, response) {
     return;
   }
   onSubscribe(request, response);
-  if (commandBuffer !== undefined) {
+  if (commandBuffer.hasValue()) {
     publish(commandBuffer.command);
     clearCommandBuffer();
   }
@@ -164,18 +170,17 @@ function formatCommand(command) {
 }
 
 function setCommandBuffer(command) {
-  commandBuffer = {
-    command: command,
-    timeoutId = setTimeout(() => {
-      commandBuffer = undefined;
-    }, 2000)
-  };
+  clearCommandBuffer();
+  commandBuffer.command = command;
+  commandBuffer.timeoutId = setTimeout(() => {
+    commandBuffer.command = undefined;
+  }, 2000);
 }
 
 function clearCommandBuffer() {
-  if (commandBuffer === undefined) {
+  if (!commandBuffer.hasValue()) {
     return;
   }
   clearTimeout(commandBuffer.timeoutId);
-  commandBuffer = undefined;
+  commandBuffer.command = undefined;
 }
