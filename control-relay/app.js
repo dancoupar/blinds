@@ -4,9 +4,9 @@ const url = require('url');
 let subscribers = Object.create(null);
 let commandBuffer = {
   command: undefined,
-  timeoutId: 0
-  hasValue: function() {
-    return command !== undefined;
+  timeoutId: 0,
+  hasValue() {
+    return this.command !== undefined;
   }
 };
 
